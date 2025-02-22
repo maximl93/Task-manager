@@ -5,12 +5,19 @@ plugins {
 	java
 	checkstyle
 	jacoco
+	application
 	id("org.springframework.boot") version "3.4.3"
 	id("io.spring.dependency-management") version "1.1.7"
+	id("com.github.ben-manes.versions") version "0.51.0"
+	id("com.github.johnrengelman.shadow") version "8.1.1"
 }
 
 group = "hexlet.code"
 version = "0.0.1-SNAPSHOT"
+
+application {
+	mainClass.set("hexlet.code.AppApplication")
+}
 
 java {
 	toolchain {
@@ -31,6 +38,7 @@ repositories {
 dependencies {
 	implementation("org.springframework.boot:spring-boot-starter-data-jpa")
 	implementation("org.springframework.boot:spring-boot-starter-security")
+	implementation("org.springframework.boot:spring-boot-starter-validation")
 	implementation("org.springframework.boot:spring-boot-starter-web")
 	compileOnly("org.projectlombok:lombok")
 	developmentOnly("org.springframework.boot:spring-boot-devtools")
