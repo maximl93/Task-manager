@@ -10,6 +10,7 @@ import static jakarta.persistence.GenerationType.IDENTITY;
 
 import jakarta.validation.constraints.Email;
 import jakarta.validation.constraints.NotBlank;
+import jakarta.validation.constraints.NotNull;
 import lombok.Getter;
 import lombok.Setter;
 import org.springframework.data.annotation.CreatedDate;
@@ -36,8 +37,8 @@ public class User {
     @Email
     @Column(unique = true)
     private String email;
-    @NotBlank
-    private String password;
+    @NotNull
+    private String encodedPassword;
 
     @CreatedDate
     private LocalDate createdAt;
