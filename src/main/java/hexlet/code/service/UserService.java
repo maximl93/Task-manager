@@ -28,7 +28,8 @@ public class UserService {
     }
 
     public UserDTO findById(Long id) {
-        return userMapper.map(userRepository.findById(id).orElseThrow(() -> new ResourceNotFoundException("User not found")));
+        return userMapper.map(userRepository.findById(id)
+                .orElseThrow(() -> new ResourceNotFoundException("User not found")));
     }
 
     public List<UserDTO> findAll() {
@@ -38,7 +39,8 @@ public class UserService {
     }
 
     public UserDTO update(UserUpdateDTO updateData, Long id) {
-        User updatingUser = userRepository.findById(id).orElseThrow(() -> new ResourceNotFoundException("User not found"));
+        User updatingUser = userRepository.findById(id)
+                .orElseThrow(() -> new ResourceNotFoundException("User not found"));
         userMapper.update(updateData, updatingUser);
         userRepository.save(updatingUser);
         return userMapper.map(updatingUser);

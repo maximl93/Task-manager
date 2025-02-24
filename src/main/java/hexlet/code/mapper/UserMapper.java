@@ -28,7 +28,7 @@ public abstract class UserMapper {
     @Mapping(target = "encodedPassword", source = "password")
     public abstract User map(UserCreateDTO createData);
     public abstract UserDTO map(User user);
-    public abstract void update(UserUpdateDTO updateData,@MappingTarget User user);
+    public abstract void update(UserUpdateDTO updateData, @MappingTarget User user);
 
     @BeforeMapping
     public void encryptPassword(UserCreateDTO createData) {
@@ -36,6 +36,6 @@ public abstract class UserMapper {
         createData.setPassword(passwordEncoder.encode(password));
     }
 
-    @Mapping(target = "password",source = "encodedPassword")
+    @Mapping(target = "password", source = "encodedPassword")
     public abstract UserCreateDTO forTest(User user);
 }
