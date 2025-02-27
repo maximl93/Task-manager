@@ -28,7 +28,7 @@ public class DataInitializer implements ApplicationRunner {
         User initUser = new User();
         initUser.setFirstName(faker.name().firstName());
         initUser.setLastName(faker.name().lastName());
-        initUser.setEncodedPassword("qwerty");
+        initUser.setEncodedPassword(passwordEncoder.encode("qwerty"));
         initUser.setEmail("hexlet@example.com");
         userRepository.save(initUser);
     }
