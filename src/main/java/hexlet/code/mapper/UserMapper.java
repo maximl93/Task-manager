@@ -38,4 +38,6 @@ public abstract class UserMapper {
 
     @Mapping(target = "password", source = "encodedPassword")
     public abstract UserCreateDTO forTest(User user);
+
+    public abstract User map(UserDTO dto);
 }

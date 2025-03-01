@@ -13,4 +13,4 @@ COPY src src
 
 RUN ./gradlew installShadowDist
 
-CMD java -jar ./build/libs/demo-0.0.1-SNAPSHOT-all.jar
+CMD java -jar ./build/libs/demo-0.0.1-SNAPSHOT-all.jar --spring.profiles.active=production

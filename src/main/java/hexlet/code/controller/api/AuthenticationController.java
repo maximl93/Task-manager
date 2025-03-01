@@ -2,6 +2,7 @@ package hexlet.code.controller.api;
 
 import hexlet.code.dto.AuthDTO;
 import hexlet.code.util.JWTUtils;
+import jakarta.validation.Valid;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.security.authentication.AuthenticationManager;
 import org.springframework.security.authentication.UsernamePasswordAuthenticationToken;
@@ -20,11 +21,10 @@ public class AuthenticationController {
     private AuthenticationManager authenticationManager;
 
     @PostMapping("")
-    public String login(@RequestBody AuthDTO authData) {
+    public String login(@Valid @RequestBody AuthDTO authData) {
         UsernamePasswordAuthenticationToken authentication =
                 new UsernamePasswordAuthenticationToken(authData.getEmail(), authData.getPassword());
         authenticationManager.authenticate(authentication);
-        String token = jwtUtils.generateToken(authData.getEmail());
-        return token;
+        return jwtUtils.generateToken(authData.getEmail());
     }
 }
