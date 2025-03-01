@@ -1,5 +1,6 @@
 package hexlet.code.util;
 
+import hexlet.code.exception.ResourceNotFoundException;
 import hexlet.code.model.User;
 import hexlet.code.repository.UserRepository;
 import lombok.AllArgsConstructor;
@@ -29,5 +30,10 @@ public class UserUtils {
         String changingUserEmail = userRepository.findById(id).get().getUsername();
         String currentUserEmail = getCurrentUser().getEmail();
         return changingUserEmail.equals(currentUserEmail);
+    }
+
+    public User getTestUser() {
+        return userRepository.findByEmail("hexlet@example.com")
+                .orElseThrow(() -> new ResourceNotFoundException("User not found"));
     }
 }

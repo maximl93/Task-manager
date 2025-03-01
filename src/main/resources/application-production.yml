@@ -2,7 +2,5 @@ spring:
   datasource:
     platform: postgres
     driverClassName: org.postgresql.Driver
-    url: postgresql://fifth_project_db_user:5hqHp4r9KGKovV6oZ80PX2lTxNiH3waj@dpg-cusmmmbqf0us739lvt9g-a.frankfurt-postgres.render.com/fifth_project_db
-    username: fifth_project_db_user
-    password: 5hqHp4r9KGKovV6oZ80PX2lTxNiH3waj
+    url: ${JDBC_DATABASE_URL}
 
