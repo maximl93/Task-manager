@@ -1,9 +1,12 @@
 package hexlet.code.service;
 
+import hexlet.code.model.User;
 import hexlet.code.repository.UserRepository;
+import net.datafaker.Faker;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.security.core.userdetails.UserDetails;
 import org.springframework.security.core.userdetails.UsernameNotFoundException;
+import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.security.provisioning.UserDetailsManager;
 import org.springframework.stereotype.Service;
 
@@ -13,9 +16,19 @@ public class CustomUserDetailsService implements UserDetailsManager {
     @Autowired
     private UserRepository userRepository;
 
-    @Override
-    public void createUser(UserDetails user) {
+    @Autowired
+    private PasswordEncoder passwordEncoder;
 
+    @Autowired
+    private Faker faker;
+
+    @Override
+    public void createUser(UserDetails userData) {
+        User user = new User();
+        user.setEmail(userData.getUsername());
+        var hashedPassword = passwordEncoder.encode(userData.getPassword());
+        user.setEncodedPassword(hashedPassword);
+        userRepository.save(user);
     }
 
     @Override

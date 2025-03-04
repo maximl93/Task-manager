@@ -20,13 +20,13 @@ import org.springframework.security.oauth2.jwt.NimbusJwtEncoder;
 @Configuration
 public class EncodersConfig {
 
+    @Autowired
+    private RsaKeyProperties keyProperties;
+
     @Bean
     public PasswordEncoder passwordEncoder() {
         return new BCryptPasswordEncoder();
     }
-
-    @Autowired
-    private RsaKeyProperties keyProperties;
 
     @Bean
     public JwtEncoder jwtEncoder() {

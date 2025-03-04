@@ -2,11 +2,12 @@ package hexlet.code.controller.api;
 
 import com.fasterxml.jackson.core.type.TypeReference;
 import com.fasterxml.jackson.databind.ObjectMapper;
-import hexlet.code.dto.UserCreateDTO;
-import hexlet.code.dto.UserDTO;
+import hexlet.code.dto.user.UserCreateDTO;
+import hexlet.code.dto.user.UserDTO;
 import hexlet.code.mapper.UserMapper;
 import hexlet.code.model.User;
 import hexlet.code.repository.UserRepository;
+import hexlet.code.util.ModelProvider;
 import net.datafaker.Faker;
 import org.assertj.core.api.Assertions;
 import org.instancio.Instancio;
@@ -49,7 +50,7 @@ public class UserControllerTest {
     private MockMvc mockMvc;
 
     @Autowired
-    private Faker faker;
+    private ModelProvider modelProvider;
 
     @Autowired
     private ObjectMapper om;
@@ -73,38 +74,39 @@ public class UserControllerTest {
                 .apply(springSecurity())
                 .build();
 
-        testUser = generateRandomUser();
+        testUser = Instancio.of(modelProvider.getUserModel()).create();
         userRepository.save(testUser);
         token = jwt().jwt(builder -> builder.subject(testUser.getEmail()));
     }
 
-    public User generateRandomUser() {
-        return Instancio.of(User.class)
-                .ignore(Select.field(User::getId))
-                .ignore(Select.field(User::getCreatedAt))
-                .ignore(Select.field(User::getUpdatedAt))
-                .supply(Select.field(User::getFirstName), () -> faker.name().firstName())
-                .supply(Select.field(User::getLastName), () -> faker.name().lastName())
-                .supply(Select.field(User::getEmail), () -> faker.internet().emailAddress())
-                .supply(Select.field(User::getEncodedPassword), () ->faker.internet().password())
-                .create();
-    }
-
     @Test
     public void testCreate() throws Exception {
-        UserCreateDTO dto = userMapper.forTest(generateRandomUser());
+        UserCreateDTO newUser = userMapper.forTest(Instancio.of(modelProvider.getUserModel()).create());
 
         var request = post("/api/users")
                 .with(token)
                 .contentType(MediaType.APPLICATION_JSON)
-                .content(om.writeValueAsString(dto));
+                .content(om.writeValueAsString(newUser));
         mockMvc.perform(request)
                 .andExpect(status().isCreated());
 
-        User savedUser = userRepository.findByEmail(dto.getEmail()).orElse(null);
+        User savedUser = userRepository.findByEmail(newUser.getEmail()).orElse(null);
 
         assertNotNull(savedUser);
-        assertThat(savedUser.getFirstName()).isEqualTo(dto.getFirstName());
+        assertThat(savedUser.getFirstName()).isEqualTo(newUser.getFirstName());
+    }
+
+    @Test
+    public void testCreateWrong() throws Exception {
+        UserCreateDTO wrongData = new UserCreateDTO();
+        wrongData.setEmail("mail");
+
+        var request = post("/api/users")
+                .with(token)
+                .contentType(MediaType.APPLICATION_JSON)
+                .content(om.writeValueAsString(wrongData));
+        mockMvc.perform(request)
+                .andExpect(status().isBadRequest());
     }
 
     @Test
@@ -119,6 +121,13 @@ public class UserControllerTest {
                 v -> v.node("firstName").isEqualTo(testUser.getFirstName()),
                 v -> v.node("email").isEqualTo(testUser.getEmail())
         );
+    }
+
+    @Test
+    public void testFindByIdWithoutToken() throws Exception {
+        var request = get("/api/users/" + testUser.getId());
+        mockMvc.perform(request)
+                .andExpect(status().isUnauthorized());
     }
 
     @Test

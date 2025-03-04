@@ -1,13 +1,14 @@
 package hexlet.code.controller.api;
 
-import hexlet.code.dto.UserCreateDTO;
-import hexlet.code.dto.UserDTO;
-import hexlet.code.dto.UserUpdateDTO;
+import hexlet.code.dto.user.UserCreateDTO;
+import hexlet.code.dto.user.UserDTO;
+import hexlet.code.dto.user.UserUpdateDTO;
 import hexlet.code.service.UserService;
 import hexlet.code.util.UserUtils;
 import jakarta.validation.Valid;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpStatus;
+import org.springframework.http.ResponseEntity;
 import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.web.bind.annotation.RestController;
 import org.springframework.web.bind.annotation.RequestMapping;
@@ -22,7 +23,7 @@ import org.springframework.web.bind.annotation.DeleteMapping;
 import java.util.List;
 
 @RestController
-@RequestMapping("/api/users")
+@RequestMapping("/api")
 public class UserController {
 
     @Autowired
@@ -31,30 +32,34 @@ public class UserController {
     @Autowired
     private UserUtils userUtils;
 
-    @PostMapping("")
+    @PostMapping("/users")
     @ResponseStatus(HttpStatus.CREATED)
     public UserDTO create(@Valid @RequestBody UserCreateDTO createData) {
         return userService.create(createData);
     }
 
-    @GetMapping("/{id}")
+    @GetMapping("/users/{id}")
     public UserDTO findById(@PathVariable Long id) {
         return userService.findById(id);
     }
 
-    @GetMapping("")
-    public List<UserDTO> findAll() {
-        return userService.findAll();
+    @GetMapping("/users")
+    public ResponseEntity<List<UserDTO>> findAll() {
+        List<UserDTO> users = userService.findAll();
+
+        return ResponseEntity.ok()
+                .header("X-Total-Count", String.valueOf(users.size()))
+                .body(users);
     }
 
-    @PutMapping("/{id}")
+    @PutMapping("/users/{id}")
     @PreAuthorize("@userUtils.isSameUser(#id)")
     public UserDTO update(@Valid @RequestBody UserUpdateDTO updateData,
                           @PathVariable Long id) {
         return userService.update(updateData, id);
     }
 
-    @DeleteMapping("/{id}")
+    @DeleteMapping("/users/{id}")
     @ResponseStatus(HttpStatus.NO_CONTENT)
     @PreAuthorize("@userUtils.isSameUser(#id)")
     public void deleteById(@PathVariable Long id) {

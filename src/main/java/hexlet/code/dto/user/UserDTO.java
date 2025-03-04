@@ -1,4 +1,4 @@
-package hexlet.code.dto;
+package hexlet.code.dto.user;
 
 import lombok.Getter;
 import lombok.Setter;
@@ -13,5 +13,4 @@ public class UserDTO {
     private String lastName;
     private String email;
     private LocalDate createdAt;
-    private LocalDate updatedAt;
 }

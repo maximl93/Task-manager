@@ -1,35 +1,47 @@
 package hexlet.code.component;
 
+import hexlet.code.model.TaskStatus;
 import hexlet.code.model.User;
-import hexlet.code.repository.UserRepository;
+import hexlet.code.repository.TaskStatusRepository;
+import hexlet.code.service.CustomUserDetailsService;
 import lombok.AllArgsConstructor;
-import net.datafaker.Faker;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.ApplicationArguments;
 import org.springframework.boot.ApplicationRunner;
-import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Component;
+
+import java.util.Map;
 
 @Component
 @AllArgsConstructor
 public class DataInitializer implements ApplicationRunner {
 
     @Autowired
-    private UserRepository userRepository;
+    private final CustomUserDetailsService userService;
 
     @Autowired
-    private PasswordEncoder passwordEncoder;
-
-    @Autowired
-    private Faker faker;
+    private TaskStatusRepository taskStatusRepository;
 
     @Override
     public void run(ApplicationArguments args) throws Exception {
         User initUser = new User();
-        initUser.setFirstName(faker.name().firstName());
-        initUser.setLastName(faker.name().lastName());
-        initUser.setEncodedPassword(passwordEncoder.encode("qwerty"));
+        initUser.setEncodedPassword("qwerty");
         initUser.setEmail("hexlet@example.com");
-        userRepository.save(initUser);
+        userService.createUser(initUser);
+
+        Map<String, String> taskStatuses = Map.of(
+                "Draft", "draft",
+                "ToReview", "to_review",
+                "ToBeFixed", "to_be_fixed",
+                "ToPublish", "to_publish",
+                "Published", "published"
+        );
+
+        taskStatuses.forEach((key, value) -> {
+            TaskStatus taskStatus = new TaskStatus();
+            taskStatus.setName(key);
+            taskStatus.setSlug(value);
+            taskStatusRepository.save(taskStatus);
+        });
     }
 }

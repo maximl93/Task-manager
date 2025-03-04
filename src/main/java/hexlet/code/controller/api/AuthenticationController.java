@@ -2,7 +2,6 @@ package hexlet.code.controller.api;
 
 import hexlet.code.dto.AuthDTO;
 import hexlet.code.util.JWTUtils;
-import jakarta.validation.Valid;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.security.authentication.AuthenticationManager;
 import org.springframework.security.authentication.UsernamePasswordAuthenticationToken;
@@ -12,7 +11,7 @@ import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RestController;
 
 @RestController
-@RequestMapping("/api/login")
+@RequestMapping("/api")
 public class AuthenticationController {
     @Autowired
     private JWTUtils jwtUtils;
@@ -20,11 +19,11 @@ public class AuthenticationController {
     @Autowired
     private AuthenticationManager authenticationManager;
 
-    @PostMapping("")
-    public String login(@Valid @RequestBody AuthDTO authData) {
+    @PostMapping("/login")
+    public String login(@RequestBody AuthDTO authData) {
         UsernamePasswordAuthenticationToken authentication =
-                new UsernamePasswordAuthenticationToken(authData.getEmail(), authData.getPassword());
+                new UsernamePasswordAuthenticationToken(authData.getUsername(), authData.getPassword());
         authenticationManager.authenticate(authentication);
-        return jwtUtils.generateToken(authData.getEmail());
+        return jwtUtils.generateToken(authData.getUsername());
     }
 }
