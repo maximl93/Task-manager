@@ -6,10 +6,13 @@ import jakarta.persistence.Id;
 import jakarta.persistence.Table;
 import jakarta.persistence.GeneratedValue;
 import jakarta.persistence.Column;
+import jakarta.persistence.OneToMany;
+import jakarta.persistence.CascadeType;
 import static jakarta.persistence.GenerationType.IDENTITY;
 
 import jakarta.validation.constraints.Email;
 import jakarta.validation.constraints.NotNull;
+import jakarta.validation.constraints.Size;
 import lombok.EqualsAndHashCode;
 import lombok.Getter;
 import lombok.Setter;
@@ -23,6 +26,7 @@ import org.springframework.security.core.userdetails.UserDetails;
 import java.time.LocalDate;
 import java.util.ArrayList;
 import java.util.Collection;
+import java.util.List;
 
 @Entity
 @Table(name = "users")
@@ -31,12 +35,15 @@ import java.util.Collection;
 @ToString(includeFieldNames = true, onlyExplicitlyIncluded = true)
 @Getter
 @Setter
-public class User implements UserDetails {
+public class User implements UserDetails, BaseEntity {
     @Id
     @GeneratedValue(strategy = IDENTITY)
     @EqualsAndHashCode.Include
     @ToString.Include
     private Long id;
+
+    @OneToMany(mappedBy = "assignee", cascade = CascadeType.MERGE)
+    private List<Task> tasks = new ArrayList<>();
 
     @ToString.Include
     private String firstName;
@@ -48,6 +55,7 @@ public class User implements UserDetails {
     @ToString.Include
     private String email;
     @NotNull
+    @Size(min = 3)
     private String encodedPassword;
 
     @CreatedDate

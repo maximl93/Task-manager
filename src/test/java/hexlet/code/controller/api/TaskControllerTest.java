@@ -2,10 +2,14 @@ package hexlet.code.controller.api;
 
 import com.fasterxml.jackson.core.type.TypeReference;
 import com.fasterxml.jackson.databind.ObjectMapper;
-import hexlet.code.dto.user.UserCreateDTO;
-import hexlet.code.dto.user.UserDTO;
-import hexlet.code.mapper.UserMapper;
+import hexlet.code.dto.task.TaskCreateDTO;
+import hexlet.code.dto.task.TaskDTO;
+import hexlet.code.mapper.TaskMapper;
+import hexlet.code.model.Task;
+import hexlet.code.model.TaskStatus;
 import hexlet.code.model.User;
+import hexlet.code.repository.TaskRepository;
+import hexlet.code.repository.TaskStatusRepository;
 import hexlet.code.repository.UserRepository;
 import hexlet.code.util.ModelProvider;
 import org.assertj.core.api.Assertions;
@@ -39,10 +43,16 @@ import static org.springframework.test.web.servlet.request.MockMvcRequestBuilder
 
 @SpringBootTest
 @AutoConfigureMockMvc
-public class UserControllerTest {
+public class TaskControllerTest {
 
     @Autowired
     private WebApplicationContext wac;
+
+    @Autowired
+    private ObjectMapper om;
+
+    @Autowired
+    private TaskMapper taskMapper;
 
     @Autowired
     private MockMvc mockMvc;
@@ -51,21 +61,27 @@ public class UserControllerTest {
     private ModelProvider modelProvider;
 
     @Autowired
-    private ObjectMapper om;
+    private TaskRepository taskRepository;
 
     @Autowired
     private UserRepository userRepository;
 
     @Autowired
-    private UserMapper userMapper;
+    private TaskStatusRepository taskStatusRepository;
 
     private JwtRequestPostProcessor token;
+
+    private Task testTask;
+
+    private TaskStatus testTaskStatus;
 
     private User testUser;
 
     @BeforeEach
     public void setUp() {
+        taskRepository.deleteAll();
         userRepository.deleteAll();
+        taskStatusRepository.deleteAll();
 
         mockMvc = MockMvcBuilders.webAppContextSetup(wac)
                 .defaultResponseCharacterEncoding(StandardCharsets.UTF_8)
@@ -74,97 +90,121 @@ public class UserControllerTest {
 
         testUser = Instancio.of(modelProvider.getUserModel()).create();
         userRepository.save(testUser);
+
+        testTaskStatus = Instancio.of(modelProvider.getTaskStatusModel()).create();
+        taskStatusRepository.save(testTaskStatus);
+
+        testTask = Instancio.of(modelProvider.getTaskModel()).create();
+        testTask.setTaskStatus(testTaskStatus);
+        testTask.setAssignee(testUser);
+        taskRepository.save(testTask);
+
         token = jwt().jwt(builder -> builder.subject(testUser.getEmail()));
     }
 
     @Test
     public void testCreateValidData() throws Exception {
-        UserCreateDTO newUser = userMapper.forTest(Instancio.of(modelProvider.getUserModel()).create());
+        TaskCreateDTO newTask = taskMapper
+                .forTest(Instancio.of(modelProvider.getTaskModel()).create());
+        newTask.setAssigneeId(testUser.getId());
+        newTask.setStatus(testTaskStatus.getSlug());
 
-        var request = post("/api/users")
+        var request = post("/api/tasks")
                 .with(token)
                 .contentType(MediaType.APPLICATION_JSON)
-                .content(om.writeValueAsString(newUser));
+                .content(om.writeValueAsString(newTask));
         mockMvc.perform(request)
                 .andExpect(status().isCreated());
+        Task savedTask = taskRepository.findByName(newTask.getTitle()).get();
 
-        User savedUser = userRepository.findByEmail(newUser.getEmail()).orElse(null);
-
-        assertNotNull(savedUser);
-        assertThat(savedUser.getFirstName()).isEqualTo(newUser.getFirstName());
+        assertNotNull(savedTask);
+        assertThat(savedTask.getName()).isEqualTo(newTask.getTitle());
     }
 
     @Test
     public void testCreateInvalidData() throws Exception {
-        UserCreateDTO wrongData = new UserCreateDTO();
-        wrongData.setEmail("mail");
+        TaskCreateDTO newTask = taskMapper
+                .forTest(Instancio.of(modelProvider.getTaskModel()).create());
 
-        var request = post("/api/users")
+        var request = post("/api/tasks")
                 .with(token)
                 .contentType(MediaType.APPLICATION_JSON)
-                .content(om.writeValueAsString(wrongData));
+                .content(om.writeValueAsString(newTask));
         mockMvc.perform(request)
                 .andExpect(status().isBadRequest());
     }
 
     @Test
     public void testFindById() throws Exception {
-        var request = get("/api/users/" + testUser.getId()).with(token);
+        var request = get("/api/tasks/" + testTask.getId()).with(token);
         var result = mockMvc.perform(request)
                 .andExpect(status().isOk())
                 .andReturn();
         var body = result.getResponse().getContentAsString();
 
         assertThatJson(body).and(
-                v -> v.node("firstName").isEqualTo(testUser.getFirstName()),
-                v -> v.node("email").isEqualTo(testUser.getEmail())
+                v -> v.node("title").isEqualTo(testTask.getName()),
+                v -> v.node("status").isEqualTo(testTask.getTaskStatus().getSlug())
         );
     }
 
     @Test
     public void testFindByIdUnauthorized() throws Exception {
-        var request = get("/api/users/" + testUser.getId());
-        mockMvc.perform(request)
+        var request = get("/api/tasks/" + testTask.getId());
+        var result = mockMvc.perform(request)
                 .andExpect(status().isUnauthorized());
     }
 
     @Test
-    public void testFindAll() throws Exception{
-        var request = get("/api/users").with(token);
+    public void testFindAll() throws Exception {
+        var request = get("/api/tasks").with(token);
         var result = mockMvc.perform(request)
                 .andExpect(status().isOk())
                 .andReturn();
         var body = result.getResponse().getContentAsString();
-        List<UserDTO> userDTOS = om.readValue(body, new TypeReference<>() {});
-        var actual = userDTOS.stream().map(userMapper::map).toList();
-        var expected = userRepository.findAll();
+        List<TaskDTO> taskDTOS = om.readValue(body, new TypeReference<>() {});
+        var actual = taskDTOS.stream().map(taskMapper::map).toList();
+        var expected = taskRepository.findAll();
 
         Assertions.assertThat(actual).containsExactlyInAnyOrderElementsOf(expected);
     }
 
     @Test
-    public void testUpdate() throws Exception{
-        Map<String, String> updateData = new HashMap<>();
-        updateData.put("firstName", "Maksim");
+    public void testDeleteById() throws Exception {
+        var request = delete("/api/tasks/" + testTask.getId()).with(token);
+        mockMvc.perform(request)
+                .andExpect(status().isNoContent());
+        Task deletedTask = taskRepository.findById(testTask.getId()).orElse(null);
 
-        var request = put("/api/users/" + testUser.getId())
+        assertThat(deletedTask).isNull();
+    }
+
+    @Test
+    public void testUpdateValidData() throws Exception {
+        Map<String, String> updateData = new HashMap<>();
+        updateData.put("title", "Update");
+
+        var request = put("/api/tasks/" + testTask.getId())
                 .with(token)
                 .contentType(MediaType.APPLICATION_JSON)
                 .content(om.writeValueAsString(updateData));
         mockMvc.perform(request)
                 .andExpect(status().isOk());
-        User updatedUser = userRepository.findById(testUser.getId()).get();
+        Task updatedTask = taskRepository.findById(testTask.getId()).get();
 
-        assertThat(updatedUser.getFirstName()).isEqualTo(updateData.get("firstName"));
+        assertThat(updatedTask.getName()).isEqualTo(updateData.get("title"));
     }
 
     @Test
-    public void testDeleteById() throws Exception{
-        var request = delete("/api/users/" + testUser.getId()).with(token);
-        mockMvc.perform(request)
-                .andExpect(status().isNoContent());
-        User deletedUser = userRepository.findById(testUser.getId()).orElse(null);
+    public void testUpdateInvalidData() throws Exception {
+        Map<String, String> updateData = new HashMap<>();
+        updateData.put("title", "");
 
-        assertThat(deletedUser).isNull();
+        var request = put("/api/tasks/" + testTask.getId())
+                .with(token)
+                .contentType(MediaType.APPLICATION_JSON)
+                .content(om.writeValueAsString(updateData));
+        mockMvc.perform(request)
+                .andExpect(status().isBadRequest());
     }
 }
