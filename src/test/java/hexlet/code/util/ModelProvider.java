@@ -31,7 +31,7 @@ public class ModelProvider {
                 .supply(Select.field(User::getFirstName), () -> faker.name().firstName())
                 .supply(Select.field(User::getLastName), () -> faker.name().lastName())
                 .supply(Select.field(User::getEmail), () -> faker.internet().emailAddress())
-                .supply(Select.field(User::getEncodedPassword), () ->faker.internet().password())
+                .supply(Select.field(User::getEncodedPassword), () -> faker.internet().password())
                 .toModel();
 
         taskStatusModel = Instancio.of(TaskStatus.class)
@@ -46,7 +46,7 @@ public class ModelProvider {
                 .ignore(Select.field(Task::getCreatedAt))
                 .ignore(Select.field(Task::getAssignee))
                 .ignore(Select.field(Task::getTaskStatus))
-                .supply(Select.field(Task::getName),() -> faker.lorem().word())
+                .supply(Select.field(Task::getName), () -> faker.lorem().word())
                 .supply(Select.field(Task::getDescription), () -> faker.lorem().paragraph(7))
                 .supply(Select.field(Task::getIndex), () -> faker.number().randomNumber())
                 .toModel();

@@ -162,7 +162,7 @@ public class TaskControllerTest {
                 .andExpect(status().isOk())
                 .andReturn();
         var body = result.getResponse().getContentAsString();
-        List<TaskDTO> taskDTOS = om.readValue(body, new TypeReference<>() {});
+        List<TaskDTO> taskDTOS = om.readValue(body, new TypeReference<>() { });
         var actual = taskDTOS.stream().map(taskMapper::map).toList();
         var expected = taskRepository.findAll();
 

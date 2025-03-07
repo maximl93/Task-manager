@@ -7,6 +7,7 @@ import hexlet.code.dto.taskStatus.TaskStatusDTO;
 import hexlet.code.mapper.TaskStatusMapper;
 import hexlet.code.model.TaskStatus;
 import hexlet.code.model.User;
+import hexlet.code.repository.TaskRepository;
 import hexlet.code.repository.TaskStatusRepository;
 import hexlet.code.repository.UserRepository;
 import hexlet.code.util.ModelProvider;
@@ -58,6 +59,9 @@ public class TaskStatusControllerTest {
     private UserRepository userRepository;
 
     @Autowired
+    private TaskRepository taskRepository;
+
+    @Autowired
     private ModelProvider modelProvider;
 
     @Autowired
@@ -71,7 +75,7 @@ public class TaskStatusControllerTest {
 
     @BeforeEach
     public void setUp() {
-        userRepository.deleteAll();
+        taskRepository.deleteAll();
         taskStatusRepository.deleteAll();
 
         mockMvc = MockMvcBuilders.webAppContextSetup(wac)
@@ -97,7 +101,7 @@ public class TaskStatusControllerTest {
 
         var body = result.getResponse().getContentAsString();
 
-        List<TaskStatusDTO> taskStatusesDTOs = om.readValue(body, new TypeReference<>() {});
+        List<TaskStatusDTO> taskStatusesDTOs = om.readValue(body, new TypeReference<>() { });
 
         var actual = taskStatusesDTOs.stream().map(taskStatusMapper::map).toList();
         var expected = taskStatusRepository.findAll();

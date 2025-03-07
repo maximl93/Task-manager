@@ -6,6 +6,7 @@ import hexlet.code.dto.user.UserCreateDTO;
 import hexlet.code.dto.user.UserDTO;
 import hexlet.code.mapper.UserMapper;
 import hexlet.code.model.User;
+import hexlet.code.repository.TaskRepository;
 import hexlet.code.repository.UserRepository;
 import hexlet.code.util.ModelProvider;
 import org.assertj.core.api.Assertions;
@@ -57,6 +58,9 @@ public class UserControllerTest {
     private UserRepository userRepository;
 
     @Autowired
+    private TaskRepository taskRepository;
+
+    @Autowired
     private UserMapper userMapper;
 
     private JwtRequestPostProcessor token;
@@ -65,6 +69,7 @@ public class UserControllerTest {
 
     @BeforeEach
     public void setUp() {
+        taskRepository.deleteAll();
         userRepository.deleteAll();
 
         mockMvc = MockMvcBuilders.webAppContextSetup(wac)
@@ -129,13 +134,13 @@ public class UserControllerTest {
     }
 
     @Test
-    public void testFindAll() throws Exception{
+    public void testFindAll() throws Exception {
         var request = get("/api/users").with(token);
         var result = mockMvc.perform(request)
                 .andExpect(status().isOk())
                 .andReturn();
         var body = result.getResponse().getContentAsString();
-        List<UserDTO> userDTOS = om.readValue(body, new TypeReference<>() {});
+        List<UserDTO> userDTOS = om.readValue(body, new TypeReference<>() { });
         var actual = userDTOS.stream().map(userMapper::map).toList();
         var expected = userRepository.findAll();
 
@@ -143,7 +148,7 @@ public class UserControllerTest {
     }
 
     @Test
-    public void testUpdate() throws Exception{
+    public void testUpdate() throws Exception {
         Map<String, String> updateData = new HashMap<>();
         updateData.put("firstName", "Maksim");
 
@@ -159,7 +164,7 @@ public class UserControllerTest {
     }
 
     @Test
-    public void testDeleteById() throws Exception{
+    public void testDeleteById() throws Exception {
         var request = delete("/api/users/" + testUser.getId()).with(token);
         mockMvc.perform(request)
                 .andExpect(status().isNoContent());
