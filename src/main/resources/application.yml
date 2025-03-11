@@ -8,6 +8,8 @@ spring:
   output:
     ansi:
       enabled: always
+  profiles:
+    default: development
 
 springdoc:
   swagger-ui:

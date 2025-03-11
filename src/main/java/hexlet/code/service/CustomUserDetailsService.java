@@ -2,7 +2,6 @@ package hexlet.code.service;
 
 import hexlet.code.model.User;
 import hexlet.code.repository.UserRepository;
-import net.datafaker.Faker;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.security.core.userdetails.UserDetails;
 import org.springframework.security.core.userdetails.UsernameNotFoundException;
@@ -18,9 +17,6 @@ public class CustomUserDetailsService implements UserDetailsManager {
 
     @Autowired
     private PasswordEncoder passwordEncoder;
-
-    @Autowired
-    private Faker faker;
 
     @Override
     public void createUser(UserDetails userData) {
