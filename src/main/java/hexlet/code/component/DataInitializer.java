@@ -5,6 +5,7 @@ import hexlet.code.model.TaskStatus;
 import hexlet.code.model.User;
 import hexlet.code.repository.LabelRepository;
 import hexlet.code.repository.TaskStatusRepository;
+import hexlet.code.repository.UserRepository;
 import hexlet.code.service.CustomUserDetailsService;
 import lombok.AllArgsConstructor;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -28,14 +29,27 @@ public class DataInitializer implements ApplicationRunner {
     @Autowired
     private LabelRepository labelRepository;
 
+    @Autowired
+    private UserRepository userRepository;
+
     @Override
     public void run(ApplicationArguments args) throws Exception {
-        User initUser = new User();
-        initUser.setEncodedPassword("qwerty");
-        initUser.setEmail("hexlet@example.com");
-        userService.createUser(initUser);
+        setDefaultUser();
+        setDefaultTaskStatuses();
+        setDefaultLabels();
+    }
 
-        Map<String, String> taskStatuses = Map.of(
+    public void setDefaultUser() {
+        if (userRepository.findByEmail("hexlet@example.com").isEmpty()) {
+            User initUser = new User();
+            initUser.setEncodedPassword("qwerty");
+            initUser.setEmail("hexlet@example.com");
+            userService.createUser(initUser);
+        }
+    }
+
+    public void setDefaultTaskStatuses() {
+        Map<String, String> defaultTaskStatuses = Map.of(
                 "Draft", "draft",
                 "ToReview", "to_review",
                 "ToBeFixed", "to_be_fixed",
@@ -43,18 +57,25 @@ public class DataInitializer implements ApplicationRunner {
                 "Published", "published"
         );
 
-        taskStatuses.forEach((key, value) -> {
-            TaskStatus taskStatus = new TaskStatus();
-            taskStatus.setName(key);
-            taskStatus.setSlug(value);
-            taskStatusRepository.save(taskStatus);
-        });
+        defaultTaskStatuses.entrySet().stream()
+                .filter(entry -> taskStatusRepository.findBySlug(entry.getValue()).isEmpty())
+                .map(entry -> {
+                    TaskStatus taskStatus = new TaskStatus();
+                    taskStatus.setName(entry.getKey());
+                    taskStatus.setSlug(entry.getValue());
+                    return taskStatus;
+                })
+                .forEach(taskStatusRepository::save);
+    }
 
+    public void setDefaultLabels() {
         List<String> labelsNames = List.of("feature", "bug");
         for (String name : labelsNames) {
-            Label label = new Label();
-            label.setName(name);
-            labelRepository.save(label);
+            if (labelRepository.findByName(name).isEmpty()) {
+                Label label = new Label();
+                label.setName(name);
+                labelRepository.save(label);
+            }
         }
     }
 }
