@@ -1,16 +1,9 @@
-FROM eclipse-temurin:21-jdk
+FROM gradle:8.12.1-jdk21
 
-RUN apt-get update && apt-get install -yq make unzip
+WORKDIR .
 
-COPY gradle gradle
-COPY build.gradle.kts .
-COPY settings.gradle.kts .
-COPY gradlew .
+COPY . .
 
-RUN ./gradlew --no-daemon dependencies
+RUN gradle installDist
 
-COPY src src
-
-RUN ./gradlew installShadowDist
-
-CMD java -jar ./build/libs/demo-0.0.1-SNAPSHOT-all.jar --spring.profiles.active=production
+CMD ./build/install/demo/bin/demo
