@@ -34,9 +34,7 @@ public class TaskStatusService {
     }
 
     public List<TaskStatusDTO> findAll() {
-        return taskStatusRepository.findAll().stream()
-                .map(taskStatusMapper::map)
-                .toList();
+        return taskStatusMapper.map(taskStatusRepository.findAll());
     }
 
     public TaskStatusDTO update(Long id, TaskStatusUpdateDTO updateData) {

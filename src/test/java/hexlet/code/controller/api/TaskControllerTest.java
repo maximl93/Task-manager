@@ -5,9 +5,11 @@ import com.fasterxml.jackson.databind.ObjectMapper;
 import hexlet.code.dto.task.TaskCreateDTO;
 import hexlet.code.dto.task.TaskDTO;
 import hexlet.code.mapper.TaskMapper;
+import hexlet.code.model.Label;
 import hexlet.code.model.Task;
 import hexlet.code.model.TaskStatus;
 import hexlet.code.model.User;
+import hexlet.code.repository.LabelRepository;
 import hexlet.code.repository.TaskRepository;
 import hexlet.code.repository.TaskStatusRepository;
 import hexlet.code.repository.UserRepository;
@@ -67,6 +69,9 @@ public class TaskControllerTest {
     private UserRepository userRepository;
 
     @Autowired
+    private LabelRepository labelRepository;
+
+    @Autowired
     private TaskStatusRepository taskStatusRepository;
 
     private JwtRequestPostProcessor token;
@@ -77,9 +82,12 @@ public class TaskControllerTest {
 
     private User testUser;
 
+    private Label testLabel;
+
     @BeforeEach
     public void setUp() {
         taskRepository.deleteAll();
+        labelRepository.deleteAll();
         userRepository.deleteAll();
         taskStatusRepository.deleteAll();
 
@@ -90,16 +98,19 @@ public class TaskControllerTest {
 
         testUser = Instancio.of(modelProvider.getUserModel()).create();
         userRepository.save(testUser);
+        token = jwt().jwt(builder -> builder.subject(testUser.getEmail()));
 
         testTaskStatus = Instancio.of(modelProvider.getTaskStatusModel()).create();
         taskStatusRepository.save(testTaskStatus);
 
+        testLabel = Instancio.of(modelProvider.getLabelModel()).create();
+        labelRepository.save(testLabel);
+
         testTask = Instancio.of(modelProvider.getTaskModel()).create();
         testTask.setTaskStatus(testTaskStatus);
         testTask.setAssignee(testUser);
+        testTask.setTaskLabels(List.of(testLabel));
         taskRepository.save(testTask);
-
-        token = jwt().jwt(builder -> builder.subject(testUser.getEmail()));
     }
 
     @Test
@@ -108,6 +119,7 @@ public class TaskControllerTest {
                 .forTest(Instancio.of(modelProvider.getTaskModel()).create());
         newTask.setAssigneeId(testUser.getId());
         newTask.setStatus(testTaskStatus.getSlug());
+        newTask.setTaskLabelIds(List.of(testLabel.getId()));
 
         var request = post("/api/tasks")
                 .with(token)

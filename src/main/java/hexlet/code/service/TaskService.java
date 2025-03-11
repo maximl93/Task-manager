@@ -37,9 +37,7 @@ public class TaskService {
     }
 
     public List<TaskDTO> findAll() {
-        return taskRepository.findAll().stream()
-                .map(taskMapper::map)
-                .toList();
+        return taskMapper.map(taskRepository.findAll());
     }
 
     public TaskDTO update(Long id, TaskUpdateDTO updateData) {

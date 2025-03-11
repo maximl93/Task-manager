@@ -33,9 +33,7 @@ public class UserService {
     }
 
     public List<UserDTO> findAll() {
-        return userRepository.findAll().stream()
-                .map(userMapper::map)
-                .toList();
+        return userMapper.map(userRepository.findAll());
     }
 
     public UserDTO update(UserUpdateDTO updateData, Long id) {

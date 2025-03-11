@@ -23,7 +23,7 @@ import org.springframework.web.bind.annotation.DeleteMapping;
 import java.util.List;
 
 @RestController
-@RequestMapping("/api")
+@RequestMapping("/api/users")
 public class UserController {
 
     @Autowired
@@ -32,18 +32,18 @@ public class UserController {
     @Autowired
     private UserUtils userUtils;
 
-    @PostMapping("/users")
+    @PostMapping("")
     @ResponseStatus(HttpStatus.CREATED)
     public UserDTO create(@Valid @RequestBody UserCreateDTO createData) {
         return userService.create(createData);
     }
 
-    @GetMapping("/users/{id}")
+    @GetMapping("/{id}")
     public UserDTO findById(@PathVariable Long id) {
         return userService.findById(id);
     }
 
-    @GetMapping("/users")
+    @GetMapping("")
     public ResponseEntity<List<UserDTO>> findAll() {
         List<UserDTO> users = userService.findAll();
 
@@ -52,14 +52,14 @@ public class UserController {
                 .body(users);
     }
 
-    @PutMapping("/users/{id}")
+    @PutMapping("/{id}")
     @PreAuthorize("@userUtils.isSameUser(#id)")
     public UserDTO update(@Valid @RequestBody UserUpdateDTO updateData,
                           @PathVariable Long id) {
         return userService.update(updateData, id);
     }
 
-    @DeleteMapping("/users/{id}")
+    @DeleteMapping("/{id}")
     @ResponseStatus(HttpStatus.NO_CONTENT)
     @PreAuthorize("@userUtils.isSameUser(#id)")
     public void deleteById(@PathVariable Long id) {
