@@ -4,6 +4,7 @@ import com.fasterxml.jackson.core.type.TypeReference;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import hexlet.code.dto.task.TaskCreateDTO;
 import hexlet.code.dto.task.TaskDTO;
+import hexlet.code.dto.task.TaskParamsDTO;
 import hexlet.code.mapper.TaskMapper;
 import hexlet.code.model.Label;
 import hexlet.code.model.Task;
@@ -179,6 +180,35 @@ public class TaskControllerTest {
         var expected = taskRepository.findAll();
 
         Assertions.assertThat(actual).containsExactlyInAnyOrderElementsOf(expected);
+    }
+
+    @Test
+    public void testFindAllWithParams() throws Exception {
+        TaskParamsDTO params = new TaskParamsDTO();
+        params.setAssigneeId(testUser.getId());
+        params.setStatus(testTaskStatus.getSlug());
+        params.setLabelId(testLabel.getId());
+        params.setTitleCont(testTask.getName().toLowerCase());
+
+        var request = get("/api/tasks?titleCont=" + params.getTitleCont()
+                + "&assigneeId=" + params.getAssigneeId()
+                + "&status=" + params.getStatus()
+                + "&taskLabelIds=" + params.getLabelId())
+                .with(token);
+        var result = mockMvc.perform(request)
+                        .andExpect(status().isOk())
+                        .andReturn();
+        var body = result.getResponse().getContentAsString();
+
+        assertThatJson(body).isArray().allSatisfy(element ->
+                assertThatJson(element)
+                        .and(v -> v.node("title").isEqualTo(testTask.getName()))
+                        .and(v -> v.node("status").isEqualTo(testTask.getTaskStatus().getSlug()))
+                        .and(v -> v.node("assigneeId").isEqualTo(testTask.getAssignee().getId()))
+                        .and(v -> v.node("taskLabelIds").isEqualTo(testTask.getTaskLabels().stream()
+                                .map(Label::getId)
+                                .toList()))
+        );
     }
 
     @Test
