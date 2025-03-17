@@ -12,7 +12,7 @@ This project allows you to set new task, assign performers and change their stat
 
 ## Render
 
-[Ссылка](https://task-manager-cv1w.onrender.com)
+[Deployed project](https://task-manager-cv1w.onrender.com)
 
 ### To start project on your local machine
 
