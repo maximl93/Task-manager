@@ -1,12 +1,14 @@
 package hexlet.code.model;
 
 import jakarta.persistence.Entity;
-import jakarta.persistence.Table;
 import jakarta.persistence.EntityListeners;
 import jakarta.persistence.Id;
+import jakarta.persistence.Table;
 import jakarta.persistence.GeneratedValue;
-import jakarta.persistence.OneToMany;
 import jakarta.persistence.CascadeType;
+import jakarta.persistence.OneToMany;
+import jakarta.persistence.FetchType;
+
 import static jakarta.persistence.GenerationType.IDENTITY;
 
 import jakarta.validation.constraints.NotBlank;
@@ -41,7 +43,7 @@ public class TaskStatus implements BaseEntity {
     @Size(min = 1)
     private String slug;
 
-    @OneToMany(mappedBy = "taskStatus", cascade = CascadeType.MERGE)
+    @OneToMany(mappedBy = "taskStatus", cascade = CascadeType.MERGE, fetch = FetchType.LAZY)
     private List<Task> tasks = new ArrayList<>();
 
     @CreatedDate

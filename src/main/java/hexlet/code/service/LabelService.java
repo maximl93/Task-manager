@@ -3,6 +3,7 @@ package hexlet.code.service;
 import hexlet.code.dto.label.LabelCreateDTO;
 import hexlet.code.dto.label.LabelDTO;
 import hexlet.code.dto.label.LabelUpdateDTO;
+import hexlet.code.exception.ResourceAlreadyExistsException;
 import hexlet.code.exception.ResourceNotFoundException;
 import hexlet.code.mapper.LabelMapper;
 import hexlet.code.model.Label;
@@ -32,6 +33,10 @@ public class LabelService {
     }
 
     public LabelDTO create(LabelCreateDTO createData) {
+        String labelName = createData.getName();
+        if (labelRepository.findByName(labelName).isPresent()) {
+            throw new ResourceAlreadyExistsException("Label " + labelName + " already exists");
+        }
         Label newLabel = labelMapper.map(createData);
         labelRepository.save(newLabel);
         return labelMapper.map(newLabel);

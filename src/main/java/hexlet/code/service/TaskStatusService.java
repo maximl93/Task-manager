@@ -29,7 +29,7 @@ public class TaskStatusService {
 
     public TaskStatusDTO findById(Long id) {
         TaskStatus taskStatus = taskStatusRepository.findById(id)
-                .orElseThrow(() -> new ResourceNotFoundException("This task status doesn't exist"));
+                .orElseThrow(() -> new ResourceNotFoundException("Task status doesn't exist"));
         return taskStatusMapper.map(taskStatus);
     }
 
@@ -39,7 +39,7 @@ public class TaskStatusService {
 
     public TaskStatusDTO update(Long id, TaskStatusUpdateDTO updateData) {
         TaskStatus taskStatus = taskStatusRepository.findById(id)
-                .orElseThrow(() -> new ResourceNotFoundException("This task status doesn't exist"));
+                .orElseThrow(() -> new ResourceNotFoundException("Task status doesn't exist"));
         taskStatusMapper.update(updateData, taskStatus);
         taskStatusRepository.save(taskStatus);
         return taskStatusMapper.map(taskStatus);

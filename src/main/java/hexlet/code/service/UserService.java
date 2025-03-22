@@ -3,6 +3,7 @@ package hexlet.code.service;
 import hexlet.code.dto.user.UserCreateDTO;
 import hexlet.code.dto.user.UserDTO;
 import hexlet.code.dto.user.UserUpdateDTO;
+import hexlet.code.exception.ResourceAlreadyExistsException;
 import hexlet.code.exception.ResourceNotFoundException;
 import hexlet.code.mapper.UserMapper;
 import hexlet.code.model.User;
@@ -22,6 +23,10 @@ public class UserService {
     private UserMapper userMapper;
 
     public UserDTO create(UserCreateDTO createData) {
+        String email = createData.getEmail();
+        if (userRepository.findByEmail(email).isPresent()) {
+            throw new ResourceAlreadyExistsException("User with email " + email + " already exists");
+        }
         User user = userMapper.map(createData);
         userRepository.save(user);
         return userMapper.map(user);

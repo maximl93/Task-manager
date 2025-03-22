@@ -50,6 +50,7 @@ dependencies {
 	annotationProcessor("org.mapstruct:mapstruct-processor:1.5.5.Final")
 	implementation("org.openapitools:jackson-databind-nullable:0.2.6")
 	implementation("net.datafaker:datafaker:2.0.2")
+	implementation("org.json:json:20250107")
 	implementation("org.instancio:instancio-junit:3.3.0")
 	testImplementation("net.javacrumbs.json-unit:json-unit-assertj:3.2.2")
 	testImplementation("org.springframework.boot:spring-boot-starter-test")

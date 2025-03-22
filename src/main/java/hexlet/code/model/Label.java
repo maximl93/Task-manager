@@ -1,14 +1,17 @@
 package hexlet.code.model;
 
-import jakarta.persistence.Table;
+
+
+import static jakarta.persistence.GenerationType.IDENTITY;
+
 import jakarta.persistence.Entity;
 import jakarta.persistence.EntityListeners;
 import jakarta.persistence.Id;
+import jakarta.persistence.Table;
 import jakarta.persistence.GeneratedValue;
-import jakarta.persistence.ManyToMany;
 import jakarta.persistence.Column;
-
-import static jakarta.persistence.GenerationType.IDENTITY;
+import jakarta.persistence.ManyToMany;
+import jakarta.persistence.FetchType;
 
 import jakarta.validation.constraints.NotNull;
 import jakarta.validation.constraints.Size;
@@ -43,6 +46,6 @@ public class Label {
     @CreatedDate
     private LocalDate createdAt;
 
-    @ManyToMany(mappedBy = "taskLabels")
+    @ManyToMany(mappedBy = "taskLabels", fetch = FetchType.LAZY)
     private List<Task> tasks = new ArrayList<>();
 }
