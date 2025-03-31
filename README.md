@@ -17,8 +17,8 @@ This project allows you to set new task, assign performers and change their stat
 ### To start project on your local machine
 
 ```shell
-git clone https://github.com/maximl93/java-project-99.git
-cd java-project-99
+git clone https://github.com/maximl93/Task-manager.git
+cd Task-manager
 make backend
 ```
 
